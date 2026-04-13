@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Maquinados Industriales</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --color-header: #C55A4F;
+            --color-section: #E89765;
+            --color-subsection: #D07855;
+            --color-highlight: #FFFF00;
+            --color-green: #90EE90;
+            --color-text: #000000;
+            --color-white: #FFFFFF;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .color-editor {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 2px solid #ddd;
+        }
+
+        .color-editor h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .preset-palettes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .palette-btn {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .palette-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border-color: #333;
+        }
+
+        .palette-colors {
+            display: flex;
+            gap: 3px;
+            margin-top: 8px;
+            height: 20px;
+        }
+
+        .palette-color {
+            flex: 1;
+            border-radius: 3px;
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: flex-end;
+        }
+
+        .btn-save, .btn-reset {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-save {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: #45a049;
+        }
+
+        .btn-reset {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-reset:hover {
+            background: #da190b;
+        }
+
+        .save-message {
+            display: none;
+            padding: 10px;
+            background: #4CAF50;
+            color: white;
+            border-radius: 4px;
+            margin-top: 10px;
+            text-align: center;
+            animation: fadeInOut 2s;
+        }
+
+        .save-message.show {
+            display: block;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .color-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .color-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .color-control label {
+            flex: 1;
+            font-size: 14px;
+        }
+
+        .color-control input[type="color"] {
+            width: 50px;
+            height: 35px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        h1 {
+            background: var(--color-header);
+            color: var(--color-white);
+            padding: 15px;
+            border-radius: 8px 8px 0 0;
+            margin: -20px -20px 20px -20px;
+            font-size: 24px;
+        }
+
+        .price-ranges {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .price-range {
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .range-1 { background: #C55A4F; color: white; }
+        .range-2 { background: #E89765; color: white; }
+        .range-3 { background: #D07855; color: white; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background: var(--color-section);
+            color: var(--color-white);
+            font-weight: bold;
+        }
+
+        .section-header {
+            background: var(--color-section);
+            color: var(--color-white);
+            font-weight: bold;
+        }
+
+        .subsection-header {
+            background: var(--color-subsection);
+            color: var(--color-white);
+            font-weight: bold;
+        }
+
+        .highlight {
+            background: var(--color-highlight);
+        }
+
+        .result {
+            background: var(--color-green);
+            font-weight: bold;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        input[type="number"]:focus, select:focus {
+            outline: 2px solid var(--color-header);
+        }
+
+        .total-section {
+            background: var(--color-header);
+            color: var(--color-white);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .total-section h2 {
+            font-size: 32px;
+            margin-top: 10px;
+        }
+
+        .two-column-layout {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .right-panel {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid var(--color-header);
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .right-panel table {
+            margin-bottom: 20px;
+        }
+
+        .right-panel .total-section {
+            margin-top: 0;
+        }
+
+        @media (max-width: 1024px) {
+            .two-column-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .right-panel {
+                position: relative;
+                top: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 18px;
+                margin: -10px -10px 15px -10px;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 6px;
+            }
+
+            input[type="number"], select {
+                padding: 6px;
+                font-size: 12px;
+            }
+
+            .color-controls {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .description-cell {
+            min-width: 150px;
+        }
+
+        .toggle-editor {
+            background: var(--color-header);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .toggle-editor:hover {
+            opacity: 0.9;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Maquinados Industriales</h1>
+
+        <button class="toggle-editor" onclick="toggleColorEditor()">
+            🎨 Editor de Paleta de Colores
+        </button>
+
+        <div id="colorEditor" class="color-editor hidden">
+            <h3>Personalizar Colores</h3>
+            
+            <h4 style="margin-bottom: 10px; color: #555;">Paletas Predeterminadas:</h4>
+            <div class="preset-palettes">
+                <button class="palette-btn" onclick="applyPalette('default')">
+                    <div>🔶 Industrial</div>
+                    <div class="palette-colors">
+                        <div class="palette-color" style="background: #C55A4F;"></div>
+                        <div class="palette-color" style="background: #E89765;"></div>
+                        <div class="palette-color" style="background: #D07855;"></div>
+                        <div class="palette-color" style="background: #FFFF00;"></div>
+                        <div class="palette-color" style="background: #90EE90;"></div>
+                    </div>
+                </button>
+
+                <button class="palette-btn" onclick="applyPalette('ocean')">
+                    <div>🌊 Océano</div>
+                    <div class="palette-colors">
+                        <div class="palette-color" style="background: #006994;"></div>
+                        <div class="palette-color" style="background: #0891B2;"></div>
+                        <div class="palette-color" style="background: #0E7490;"></div>
+                        <div class="palette-color" style="background: #FDE047;"></div>
+                        <div class="palette-color" style="background: #BBF7D0;"></div>
+                    </div>
+                </button>
+
+                <button class="palette-btn" onclick="applyPalette('sunset')">
+                    <div>🌅 Atardecer</div>
+                    <div class="palette-colors">
+                        <div class="palette-color" style="background: #DC2626;"></div>
+                        <div class="palette-color" style="background: #F97316;"></div>
+                        <div class="palette-color" style="background: #EA580C;"></div>
+                        <div class="palette-color" style="background: #FEF08A;"></div>
+                        <div class="palette-color" style="background: #FED7AA;"></div>
+                    </div>
+                </button>
+
+                <button class="palette-btn" onclick="applyPalette('forest')">
+                    <div>🌲 Bosque</div>
+                    <div class="palette-colors">
+                        <div class="palette-color" style="background: #15803D;"></div>
+                        <div class="palette-color" style="background: #22C55E;"></div>
+                        <div class="palette-color" style="background: #16A34A;"></div>
+                        <div class="palette-color" style="background: #FEF08A;"></div>
+                        <div class="palette-color" style="background: #D9F99D;"></div>
+                    </div>
+                </button>
+
+                <button class="palette-btn" onclick="applyPalette('purple')">
+                    <div>💜 Púrpura</div>
+                    <div class="palette-colors">
+                        <div class="palette-color" style="background: #7C3AED;"></div>
+                        <div class="palette-color" style="background: #A855F7;"></div>
+                        <div class="palette-color" style="background: #9333EA;"></div>
+                        <div class="palette-color" style="background: #FDE047;"></div>
+                        <div class="palette-color" style="background: #E9D5FF;"></div>
+                    </div>
+                </button>
+
+                <button class="palette-btn" onclick="applyPalette('corporate')">
+                    <div>💼 Corporativo</div>
+                    <div class="palette-colors">
+                        <div class="palette-color" style="background: #1E3A8A;"></div>
+                        <div class="palette-color" style="background: #3B82F6;"></div>
+                        <div class="palette-color" style="background: #2563EB;"></div>
+                        <div class="palette-color" style="background: #FEF08A;"></div>
+                        <div class="palette-color" style="background: #DBEAFE;"></div>
+                    </div>
+                </button>
+            </div>
+
+            <h4 style="margin-bottom: 10px; color: #555;">Personalización Manual:</h4>
+            <div class="color-controls">
+                <div class="color-control">
+                    <label>Color Principal:</label>
+                    <input type="color" id="colorHeader" value="#C55A4F" onchange="updateColors()">
+                </div>
+                <div class="color-control">
+                    <label>Color Sección:</label>
+                    <input type="color" id="colorSection" value="#E89765" onchange="updateColors()">
+                </div>
+                <div class="color-control">
+                    <label>Color Subsección:</label>
+                    <input type="color" id="colorSubsection" value="#D07855" onchange="updateColors()">
+                </div>
+                <div class="color-control">
+                    <label>Color Resaltado:</label>
+                    <input type="color" id="colorHighlight" value="#FFFF00" onchange="updateColors()">
+                </div>
+                <div class="color-control">
+                    <label>Color Resultado:</label>
+                    <input type="color" id="colorGreen" value="#90EE90" onchange="updateColors()">
+                </div>
+            </div>
+
+            <div class="editor-actions">
+                <button class="btn-reset" onclick="resetColors()">🔄 Resetear</button>
+                <button class="btn-save" onclick="saveColors()">💾 Guardar Paleta</button>
+            </div>
+
+            <div id="saveMessage" class="save-message">
+                ✓ Paleta guardada correctamente
+            </div>
+        </div>
+
+        <div class="price-ranges">
+            <div class="price-range range-1">$1 a $5,000<br>Subir 30%</div>
+            <div class="price-range range-2">$5,000 a $10,000<br>Subir 20%</div>
+            <div class="price-range range-3">$10,000 en adelante<br>Subir 15%</div>
+        </div>
+
+        <div class="two-column-layout">
+            <!-- Columna Izquierda -->
+            <div class="column">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="description-cell">Descripción</th>
+                            <th>Costo materia prima</th>
+                            <th>% SEGÚN RANGO</th>
+                            <th>$ Ganancia</th>
+                            <th>Total Material</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="description-cell"></td>
+                            <td class="highlight">$<input type="number" id="costoMateria" value="520" oninput="calcular()"></td>
+                            <td class="highlight">
+                                <select id="porcentajeMateria" onchange="calcular()">
+                                    <option value="30">30%</option>
+                                    <option value="20">20%</option>
+                                    <option value="15">15%</option>
+                                </select>
+                            </td>
+                            <td>$<span id="gananciaMateria">156.00</span></td>
+                            <td class="result">$<span id="totalMateria">676.00</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="description-cell">Descripción</th>
+                            <th>Costo de tratamiento</th>
+                            <th>% SEGÚN RANGO</th>
+                            <th>$ Ganancia</th>
+                            <th>Total Material</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="description-cell"></td>
+                            <td class="highlight">$<input type="number" id="costoTratamiento" value="400" oninput="calcular()"></td>
+                            <td class="highlight">
+                                <select id="porcentajeTratamiento" onchange="calcular()">
+                                    <option value="30">30%</option>
+                                    <option value="20">20%</option>
+                                    <option value="15">15%</option>
+                                </select>
+                            </td>
+                            <td>$<span id="gananciaTratamiento">120.00</span></td>
+                            <td class="result">$<span id="totalTratamiento">520.00</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="description-cell">Descripción</th>
+                            <th>Herramientas</th>
+                            <th>% SEGÚN RANGO</th>
+                            <th>$ Ganancia</th>
+                            <th>Total Material</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="description-cell"></td>
+                            <td class="highlight">$<input type="number" id="costoHerramientas" value="100" oninput="calcular()"></td>
+                            <td class="highlight">
+                                <select id="porcentajeHerramientas" onchange="calcular()">
+                                    <option value="30">30%</option>
+                                    <option value="20">20%</option>
+                                    <option value="15">15%</option>
+                                </select>
+                            </td>
+                            <td>$<span id="gananciaHerramientas">30.00</span></td>
+                            <td class="result">$<span id="totalHerramientas">130.00</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="description-cell">Descripción</th>
+                            <th>Costo General X Hora</th>
+                            <th>% HH</th>
+                            <th>Múltiplo</th>
+                            <th>$ Ganancia x Hora</th>
+                            <th>Precio x hora</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="description-cell section-header">Engrane de 2" 24 dientes</td>
+                            <td class="highlight">$<input type="number" id="costoHora" value="200" oninput="calcular()"></td>
+                            <td class="highlight">
+                                <select id="tipoMaquinado" onchange="calcular()">
+                                    <option value="URGENCIA">MAQUINADO URGENCIA</option>
+                                    <option value="NORMAL">MAQUINADO NORMAL</option>
+                                </select>
+                            </td>
+                            <td><input type="number" id="multiplo" value="3.0" step="0.1" oninput="calcular()"></td>
+                            <td>$<span id="gananciaHora">400</span></td>
+                            <td class="result">$<span id="precioHora">600</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th colspan="2" class="subsection-header">Horas Hombre</th>
+                            <th colspan="2" class="subsection-header">Sub total HH</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="2" class="highlight"><input type="number" id="horasHombre" value="8" oninput="calcular()"></td>
+                            <td colspan="2" class="result">$<span id="subtotalHH">4800.00</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Panel Derecho -->
+            <div class="right-panel">
+                <table>
+                    <thead>
+                        <tr>
+                            <th colspan="2" class="subsection-header">Costo Financiero</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Tasa Anual</td>
+                            <td class="highlight"><input type="number" id="tasaAnual" value="34" step="0.1" oninput="calcular()">%</td>
+                        </tr>
+                        <tr>
+                            <td>Tasa diaria</td>
+                            <td><span id="tasaDiaria">0.09315%</span></td>
+                        </tr>
+                        <tr>
+                            <td>Días de crédito solicitados</td>
+                            <td class="highlight"><input type="number" id="diasCredito" value="60" oninput="calcular()"></td>
+                        </tr>
+                        <tr>
+                            <td>Factor</td>
+                            <td class="result"><span id="factor">5.59%</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="total-section">
+                    <h3>PRECIO FINAL</h3>
+                    <h2>$<span id="precioFinal">6932.42</span></h2>
+                </div>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th class="description-cell">Máquina</th>
+                    <th>Dep. Hora Máquina</th>
+                    <th>Valor</th>
+                    <th>% HM</th>
+                    <th>Sub total HM</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="subsection-header">
+                    <td>Torno</td>
+                    <td>3</td>
+                    <td class="highlight">$<input type="number" id="depTorno" value="1.00" step="0.01" oninput="calcular()"></td>
+                    <td>100%</td>
+                    <td class="result">$<span id="subtotalTorno">6.00</span></td>
+                </tr>
+                <tr class="subsection-header">
+                    <td>Generadora</td>
+                    <td>3</td>
+                    <td class="highlight">$<input type="number" id="depGeneradora" value="1.00" step="0.01" oninput="calcular()"></td>
+                    <td>100%</td>
+                    <td class="result">$<span id="subtotalGeneradora">6.00</span></td>
+                </tr>
+                <tr class="subsection-header">
+                    <td>Fresa</td>
+                    <td>2</td>
+                    <td class="highlight">$<input type="number" id="depFresa" value="1.00" step="0.01" oninput="calcular()"></td>
+                    <td>100%</td>
+                    <td class="result">$<span id="subtotalFresa">4.00</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Paletas predeterminadas
+        const palettes = {
+            default: {
+                header: '#C55A4F',
+                section: '#E89765',
+                subsection: '#D07855',
+                highlight: '#FFFF00',
+                green: '#90EE90'
+            },
+            ocean: {
+                header: '#006994',
+                section: '#0891B2',
+                subsection: '#0E7490',
+                highlight: '#FDE047',
+                green: '#BBF7D0'
+            },
+            sunset: {
+                header: '#DC2626',
+                section: '#F97316',
+                subsection: '#EA580C',
+                highlight: '#FEF08A',
+                green: '#FED7AA'
+            },
+            forest: {
+                header: '#15803D',
+                section: '#22C55E',
+                subsection: '#16A34A',
+                highlight: '#FEF08A',
+                green: '#D9F99D'
+            },
+            purple: {
+                header: '#7C3AED',
+                section: '#A855F7',
+                subsection: '#9333EA',
+                highlight: '#FDE047',
+                green: '#E9D5FF'
+            },
+            corporate: {
+                header: '#1E3A8A',
+                section: '#3B82F6',
+                subsection: '#2563EB',
+                highlight: '#FEF08A',
+                green: '#DBEAFE'
+            }
+        };
+
+        function toggleColorEditor() {
+            const editor = document.getElementById('colorEditor');
+            editor.classList.toggle('hidden');
+        }
+
+        function applyPalette(paletteName) {
+            const palette = palettes[paletteName];
+            document.getElementById('colorHeader').value = palette.header;
+            document.getElementById('colorSection').value = palette.section;
+            document.getElementById('colorSubsection').value = palette.subsection;
+            document.getElementById('colorHighlight').value = palette.highlight;
+            document.getElementById('colorGreen').value = palette.green;
+            updateColors();
+        }
+
+        function updateColors() {
+            const colorHeader = document.getElementById('colorHeader').value;
+            const colorSection = document.getElementById('colorSection').value;
+            const colorSubsection = document.getElementById('colorSubsection').value;
+            const colorHighlight = document.getElementById('colorHighlight').value;
+            const colorGreen = document.getElementById('colorGreen').value;
+
+            document.documentElement.style.setProperty('--color-header', colorHeader);
+            document.documentElement.style.setProperty('--color-section', colorSection);
+            document.documentElement.style.setProperty('--color-subsection', colorSubsection);
+            document.documentElement.style.setProperty('--color-highlight', colorHighlight);
+            document.documentElement.style.setProperty('--color-green', colorGreen);
+        }
+
+        function saveColors() {
+            const colors = {
+                header: document.getElementById('colorHeader').value,
+                section: document.getElementById('colorSection').value,
+                subsection: document.getElementById('colorSubsection').value,
+                highlight: document.getElementById('colorHighlight').value,
+                green: document.getElementById('colorGreen').value
+            };
+
+            localStorage.setItem('savedPalette', JSON.stringify(colors));
+            
+            // Mostrar mensaje de guardado
+            const message = document.getElementById('saveMessage');
+            message.classList.add('show');
+            setTimeout(() => {
+                message.classList.remove('show');
+            }, 2000);
+        }
+
+        function resetColors() {
+            applyPalette('default');
+            localStorage.removeItem('savedPalette');
+        }
+
+        function loadSavedColors() {
+            const saved = localStorage.getItem('savedPalette');
+            if (saved) {
+                const colors = JSON.parse(saved);
+                document.getElementById('colorHeader').value = colors.header;
+                document.getElementById('colorSection').value = colors.section;
+                document.getElementById('colorSubsection').value = colors.subsection;
+                document.getElementById('colorHighlight').value = colors.highlight;
+                document.getElementById('colorGreen').value = colors.green;
+                updateColors();
+            }
+        }
+
+        function calcular() {
+            // Cálculos de materiales
+            const costoMateria = parseFloat(document.getElementById('costoMateria').value) || 0;
+            const porcentajeMateria = parseFloat(document.getElementById('porcentajeMateria').value) || 0;
+            const gananciaMateria = costoMateria * (porcentajeMateria / 100);
+            const totalMateria = costoMateria + gananciaMateria;
+
+            document.getElementById('gananciaMateria').textContent = gananciaMateria.toFixed(2);
+            document.getElementById('totalMateria').textContent = totalMateria.toFixed(2);
+
+            // Cálculos de tratamiento
+            const costoTratamiento = parseFloat(document.getElementById('costoTratamiento').value) || 0;
+            const porcentajeTratamiento = parseFloat(document.getElementById('porcentajeTratamiento').value) || 0;
+            const gananciaTratamiento = costoTratamiento * (porcentajeTratamiento / 100);
+            const totalTratamiento = costoTratamiento + gananciaTratamiento;
+
+            document.getElementById('gananciaTratamiento').textContent = gananciaTratamiento.toFixed(2);
+            document.getElementById('totalTratamiento').textContent = totalTratamiento.toFixed(2);
+
+            // Cálculos de herramientas
+            const costoHerramientas = parseFloat(document.getElementById('costoHerramientas').value) || 0;
+            const porcentajeHerramientas = parseFloat(document.getElementById('porcentajeHerramientas').value) || 0;
+            const gananciaHerramientas = costoHerramientas * (porcentajeHerramientas / 100);
+            const totalHerramientas = costoHerramientas + gananciaHerramientas;
+
+            document.getElementById('gananciaHerramientas').textContent = gananciaHerramientas.toFixed(2);
+            document.getElementById('totalHerramientas').textContent = totalHerramientas.toFixed(2);
+
+            // Cálculos de hora
+            const costoHora = parseFloat(document.getElementById('costoHora').value) || 0;
+            const multiplo = parseFloat(document.getElementById('multiplo').value) || 0;
+            const gananciaHora = costoHora * multiplo;
+            const precioHora = costoHora + gananciaHora;
+
+            document.getElementById('gananciaHora').textContent = gananciaHora.toFixed(0);
+            document.getElementById('precioHora').textContent = precioHora.toFixed(0);
+
+            // Cálculos de horas hombre
+            const horasHombre = parseFloat(document.getElementById('horasHombre').value) || 0;
+            const subtotalHH = precioHora * horasHombre;
+
+            document.getElementById('subtotalHH').textContent = subtotalHH.toFixed(2);
+
+            // Cálculos de máquinas
+            const depTorno = parseFloat(document.getElementById('depTorno').value) || 0;
+            const subtotalTorno = 3 * depTorno * 2; // 3 horas * dep * 100%
+            document.getElementById('subtotalTorno').textContent = subtotalTorno.toFixed(2);
+
+            const depGeneradora = parseFloat(document.getElementById('depGeneradora').value) || 0;
+            const subtotalGeneradora = 3 * depGeneradora * 2;
+            document.getElementById('subtotalGeneradora').textContent = subtotalGeneradora.toFixed(2);
+
+            const depFresa = parseFloat(document.getElementById('depFresa').value) || 0;
+            const subtotalFresa = 2 * depFresa * 2;
+            document.getElementById('subtotalFresa').textContent = subtotalFresa.toFixed(2);
+
+            const totalMaquinas = subtotalTorno + subtotalGeneradora + subtotalFresa;
+
+            // Cálculos financieros
+            const tasaAnual = parseFloat(document.getElementById('tasaAnual').value) || 0;
+            const tasaDiaria = tasaAnual / 365;
+            document.getElementById('tasaDiaria').textContent = tasaDiaria.toFixed(5) + '%';
+
+            const diasCredito = parseFloat(document.getElementById('diasCredito').value) || 0;
+            const factor = tasaDiaria * diasCredito;
+            document.getElementById('factor').textContent = factor.toFixed(2) + '%';
+
+            // Cálculo del precio final
+            const subtotalSinFinanciero = totalMateria + totalTratamiento + totalHerramientas + subtotalHH + totalMaquinas;
+            const costoFinanciero = subtotalSinFinanciero * (factor / 100);
+            const precioFinal = subtotalSinFinanciero + costoFinanciero;
+
+            document.getElementById('precioFinal').textContent = precioFinal.toFixed(2);
+        }
+
+        // Inicializar: cargar colores guardados y calcular
+        loadSavedColors();
+        calcular();
+    </script>
+</body>
+</html>
