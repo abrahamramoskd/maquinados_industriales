@@ -9,9 +9,7 @@ Herramienta de cotización para talleres de maquinados industriales. Configura r
 
 ## ✨ Live Demo
 
-👉 **[Ver demo en vivo](https://abrahamramoskd.github.io/maquinados_industriales/cifras.html)**
-
-
+👉 **[Ver demo en vivo](https://abrahamramoskd.github.io/maquinados_industriales)**
 ## 🔧 Funcionalidades
 
 - 💰 **Rangos de precios configurables** — ajusta los valores por tipo de maquinado
